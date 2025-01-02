@@ -30,13 +30,31 @@ function movePlayer(event) {
         gerak("kanan")
     }
 }
-
-function gerak(arah){
+const control = document.querySelectorAll('.control div')
+var timer = 0
+control[0].addEventListener('mousedown', function (event) {
+    timer = setInterval(function () {
+        gerak("kiri")
+    }, 25);
+})
+control[1].addEventListener('mousedown', function (event) {
+    timer = setInterval(function () {
+        gerak("kanan")
+    }, 25);
+})
+control[0].addEventListener('mouseup', function (event) {
+    clearInterval(timer)
+})
+control[1].addEventListener('mouseup', function (event) {
+    clearInterval(timer)
+})
+// console.log(control)
+function gerak(arah) {
     if (arah === 'kiri' && playerPosition > 0) {
-        playerPosition -= 10;
+        playerPosition -= 5;
         player.style.left = playerPosition + 'px';
     } else if (arah === 'kanan' && playerPosition < gameContainer.offsetWidth - player.offsetWidth) {
-        playerPosition += 10;
+        playerPosition += 5;
         player.style.left = playerPosition + 'px';
     }
 }
@@ -60,7 +78,7 @@ function createBomb() {
 
 // Fungsi untuk menjatuhkan objek
 function dropObjects() {
-    balls.forEach(function(ball, index) {
+    balls.forEach(function (ball, index) {
         var ballTop = ball.offsetTop;
         var ballSpeed = Math.floor(Math.random() * 10) + 2;
 
@@ -75,7 +93,7 @@ function dropObjects() {
         }
     });
 
-    bombs.forEach(function(bomb, index) {
+    bombs.forEach(function (bomb, index) {
         var bombTop = bomb.offsetTop;
         var bombSpeed = Math.floor(Math.random() * 5) + 2;
 
@@ -94,7 +112,7 @@ function dropObjects() {
 
 // Fungsi untuk memeriksa tabrakan
 function checkCollision() {
-    balls.forEach(function(ball, index) {
+    balls.forEach(function (ball, index) {
         var ballRect = ball.getBoundingClientRect();
         var playerRect = player.getBoundingClientRect();
 
@@ -106,7 +124,7 @@ function checkCollision() {
         }
     });
 
-    bombs.forEach(function(bomb, index) {
+    bombs.forEach(function (bomb, index) {
         var bombRect = bomb.getBoundingClientRect();
         var playerRect = player.getBoundingClientRect();
 
@@ -118,7 +136,7 @@ function checkCollision() {
         }
     });
 
-    powerUps.forEach(function(powerUp, index) {
+    powerUps.forEach(function (powerUp, index) {
         var powerUpRect = powerUp.getBoundingClientRect();
         var playerRect = player.getBoundingClientRect();
 
@@ -186,17 +204,17 @@ function resetGame() {
     scoreValue.innerText = score;
     healthValue.innerText = health;
 
-    balls.forEach(function(ball) {
+    balls.forEach(function (ball) {
         gameContainer.removeChild(ball);
     });
     balls = [];
 
-    bombs.forEach(function(bomb) {
+    bombs.forEach(function (bomb) {
         gameContainer.removeChild(bomb);
     });
     bombs = [];
 
-    powerUps.forEach(function(powerUp) {
+    powerUps.forEach(function (powerUp) {
         gameContainer.removeChild(powerUp);
     });
     powerUps = [];
@@ -205,7 +223,7 @@ function resetGame() {
 
     startGame();
 }
- 
+
 // Event listener untuk tombol restart
 restartButton.addEventListener('click', resetGame);
 
