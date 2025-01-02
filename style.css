@@ -24,7 +24,7 @@ body{
     border: 2px solid white;
     border-radius: 10px; */
     width: 70%;
-    height: 80vh;
+    height: 100%;
     /* background-color: black; */
     display: flex;
     align-items: center;
@@ -34,7 +34,7 @@ body{
 .kon{
     display: none;
 }
-.box{
+.box, .dalam .boxHasil{
     aspect-ratio: 1/1;
     padding: 5px;
     display: flex;
@@ -49,7 +49,7 @@ body{
     flex-direction: column;
 }
 
-.pilih{
+.pilih, .dalam{
     display: none;
     flex-direction: row;
     height: 45%;
@@ -79,7 +79,7 @@ display: none;
 
 .hasil{
     padding: 10px;
-    height: 70%;
+    height: 45%;
     width: 100%;
     flex-direction: column;
     align-items: center;
@@ -104,7 +104,7 @@ display: none;
     margin-bottom: 20px;
 }
 
-.hasil .dalam .boxHasil{
+/* .hasil .dalam .boxHasil{
     aspect-ratio: 1/1;
     height: 75%;
     background-color: rgba(255, 255, 255, 0.582);
@@ -114,14 +114,14 @@ display: none;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-}
+} */
 
 .ulang{
     background-color: rgba(255, 255, 255, 0.582);
     border: 2px solid white;
     border-radius: 5px;
     padding: 5px;
-    cursor: pointe  r;
+    cursor: pointer;
 }
 h3#skor{
     position: absolute;

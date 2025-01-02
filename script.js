@@ -43,13 +43,13 @@ function cekMenang(user, bot) {
         }
     }
     if (hasil == "menang") {
-        skor[0].innerHTML = parseInt(skor[0].innerHTML)+1
+        skor[0].innerHTML = parseInt(skor[0].innerHTML) + 1
         return "menang"
     } else if (hasil == "kalah") {
-        skor[1].innerHTML = parseInt(skor[1].innerHTML)+1
+        skor[2].innerHTML = parseInt(skor[2].innerHTML) + 1
         return "kalah"
     } else {
-        skor[2].innerHTML = parseInt(skor[2].innerHTML)+1
+        skor[1].innerHTML = parseInt(skor[1].innerHTML) + 1
         return "seri"
     }
 }
