@@ -49,14 +49,23 @@ body {
 }
 @media screen and (max-width: 767px) {
     .kon {
-        /* height: ; */
+        height: auto;
         width: 100%;
-        /* display: flex; */
-        flex-wrap: wrap;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 
-    .kon h1 {
+    .kon .pilihGame {
         text-align: center;
+        background-color: white;
+        padding: 20px;
+        width: 100%;
+        max-width: 500px;
+        border-radius: 10px;
+        color: rgb(63, 63, 252);
+        font-weight: bold;
+        font-size: 20px;
     }
 
     .kontainer {

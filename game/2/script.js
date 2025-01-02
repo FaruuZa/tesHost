@@ -32,20 +32,20 @@ function movePlayer(event) {
 }
 const control = document.querySelectorAll('.control div')
 var timer = 0
-control[0].addEventListener('mousedown', function (event) {
+control[0].addEventListener('pointerdown', function (event) {
     timer = setInterval(function () {
         gerak("kiri")
     }, 25);
 })
-control[1].addEventListener('mousedown', function (event) {
+control[1].addEventListener('pointerdown', function (event) {
     timer = setInterval(function () {
         gerak("kanan")
     }, 25);
 })
-control[0].addEventListener('mouseup', function (event) {
+control[0].addEventListener('pointerup', function (event) {
     clearInterval(timer)
 })
-control[1].addEventListener('mouseup', function (event) {
+control[1].addEventListener('pointerup', function (event) {
     clearInterval(timer)
 })
 // console.log(control)

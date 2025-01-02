@@ -6,6 +6,7 @@
     overflow: hidden;
     text-decoration: none;
     color: white;
+    overflow-x: hidden;
     user-select: none;
 }
 
