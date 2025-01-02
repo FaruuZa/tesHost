@@ -32,6 +32,7 @@ canvas {
     border: none;
     outline: solid white 10px;
     height: 100%;
+    width: 100%;
 }
 
 #game-over-popup {
@@ -50,6 +51,7 @@ canvas {
     position: absolute;
     top: 20px;
     right: 20px;
+    z-index: 9999;
 }
 
 #posisi {
@@ -57,4 +59,12 @@ canvas {
     color: white;
     top: 20px;
     left: 20px;
+    z-index: 9999;
+}
+
+@media screen and (max-width: 767px) {
+    body{
+        padding-top: 50px;
+    }
+
 }

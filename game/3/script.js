@@ -197,7 +197,9 @@ function increaseScore() {
 
 // Fungsi untuk mengurangi nyawa
 function decreaseHealth() {
-    health--;
+    if (!immunity) {
+        health--;
+    }
     if (health === 0) {
         endGame();
     }
