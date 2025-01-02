@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+*{
+margin: 0;
+padding: 0;
+user-select: none;
+font-family: "Rubik", sans-serif;
+}
+
+body{
+    background-image: url(bg.jpg);
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.kontainer{
+    padding: 30px;
+    /* background-color: rgba(255, 255, 255, 0.582);
+    border: 2px solid white;
+    border-radius: 10px; */
+    width: 70%;
+    height: 80vh;
+    /* background-color: black; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.box{
+    aspect-ratio: 1/1;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.582);
+    border: 2px solid white;
+    border-radius: 10px;
+    width: 30%;
+    transition:all 0.3s;
+    cursor: pointer;
+}
+
+.pilih{
+    display: none;
+    flex-direction: row;
+    height: 45%;
+    padding: 5px;
+    justify-content: center;
+    /* background-color: rgba(255, 255, 255, 0.582);
+    border: 2px solid white; */
+    gap: 30px;
+    border-radius: 10px;
+}
+.box img, .boxHasil img{
+    aspect-ratio: 1/1;
+    width: 80%;
+}
+/* .box:first-child{
+    width: 10%;
+} */
+
+.box:hover{
+    background-color: white;
+    transform: translateY(-10px);
+    
+}
+.hasil{
+display: none;
+}
+
+.hasil{
+    padding: 10px;
+    height: 70%;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.582);
+    border: 2px solid white;
+    border-radius: 10px;
+}
+
+.hasil p{
+    text-align: center;
+    font-size: 40px;
+    font-weight: 10px;
+}
+
+.hasil .dalam{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 70%;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.hasil .dalam .boxHasil{
+    aspect-ratio: 1/1;
+    height: 75%;
+    background-color: rgba(255, 255, 255, 0.582);
+    border: 2px solid white;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.ulang{
+    background-color: rgba(255, 255, 255, 0.582);
+    border: 2px solid white;
+    border-radius: 5px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.aktif{
+    display: flex;
+}

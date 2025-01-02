@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="kontainer">
+        <div class="pilih aktif">
+            <div class="box" onclick="akuPilih('batu')"><img src="batu.png" alt=""></div>
+            <div class="box" onclick="akuPilih('gunting')"><img src="gunting.png" alt=""></div>
+            <div class="box" onclick="akuPilih('kertas')"><img src="kertas.png" alt=""></div>
+        </div>
+        <div class="hasil">
+            <p>Kamu Menang!</p>
+            <div class="dalam">
+                <div class="boxHasil">Kamu:
+                    <img src="gunting.png" alt="" id="kamuHasil">
+                </div> 
+                <div class="boxHasil">Musuh:
+                    <img src="kertas.png" alt="" id="musuhHasil">
+                </div> 
+            </div>
+            <div class="ulang" onclick="ulang()">
+                main lagi?
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
