@@ -138,32 +138,21 @@ h3#skor{
 #skor span:nth-child(3){
     color: rgb(255, 72, 72);
 }
+.aktif{
+    display: flex;
+}
 @media screen and (max-width: 767px) {
     .kon{
+        /* height: ; */
+        width: 100%;
         display: flex;
+        flex-wrap: wrap;
+    }
+    .kon h1{
+        text-align: center;
     }
     .kontainer{
         display: none;
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.aktif{
-    display: flex;
-}
