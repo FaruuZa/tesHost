@@ -9,29 +9,33 @@
 </head>
 
 <body>
-    <a href="tes2.html">pencet</a>
     <div class="kontainer">
+        <h3 id="skor"><span>0</span> / <span>0</span> / <span>0</span></h3>
         <div class="pilih aktif">
-            <div class="box" onclick="akuPilih('batu')"><img src="batu.png" alt=""></div>
-            <div class="box" onclick="akuPilih('gunting')"><img src="gunting.png" alt=""></div>
-            <div class="box" onclick="akuPilih('kertas')"><img src="kertas.png" alt=""></div>
+            <div class="box" onclick="akuPilih('batu')"><img src="img/batu.png" alt=""><span>Batu</span></div>
+            <div class="box" onclick="akuPilih('gunting')"><img src="img/gunting.png" alt=""><span>Gunting</span></div>
+            <div class="box" onclick="akuPilih('kertas')"><img src="img/kertas.png" alt=""><span>Kertas</span></div>
         </div>
         <div class="hasil">
             <p>Kamu Menang!</p>
             <div class="dalam">
                 <div class="boxHasil">Kamu:
                     <img src="gunting.png" alt="" id="kamuHasil">
-                </div> 
+                    <span>Batu</span>
+                </div>
                 <div class="boxHasil">Musuh:
                     <img src="kertas.png" alt="" id="musuhHasil">
-                </div> 
+                    <span>Batu</span>
+                </div>
             </div>
             <div class="ulang" onclick="ulang()">
                 main lagi?
             </div>
         </div>
     </div>
-
+    <div class="kon">
+        <H1 style="color:rgb(255,255,255)">MALES BIKIN RESPONSIF</H1>
+    </div>
     <script src="script.js"></script>
 </body>
 
