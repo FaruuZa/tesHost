@@ -7,7 +7,7 @@ const skor = document.querySelectorAll('#skor span');
 const boxKamu = document.querySelectorAll("div.boxHasil")[0]
 const boxMusuh = document.querySelectorAll("div.boxHasil")[1]
 
-const textHasil = document.querySelector('.hasil p')
+const textHasil = document.querySelector('.hasil h1')
 
 function pilih() {
     const random = Math.floor(Math.random() * pilihan.length);

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Catch the Ball</title>
+</head>
+
+<body>
+    <a href="../../index.html" id="back">
+        <h3>Kembali</h3>
+    </a>
+    <h3 id="posisi">Catch The Ball</h3>
+    <div id="game-container">
+        <div id="player"></div>
+        <div id="score">Score: <span id="score-value">0</span></div>
+        <div id="health">Health: <span id="health-value">3</span></div>
+        <div id="game-over-popup">
+            <div id="game-over-text">Game Over</div>
+            <div id="game-over-score">Score: <span id="game-over-score-value"></span></div>
+            <button id="restart-button">Restart</button>
+        </div>
+    </div>
+    <div class="control">
+        <div class="kiri" onclick="gerak('kiri')">
+            << /div>
+                <div class="kanan" onclick="gerak('kanan')">></div>
+        </div>
+
+        <script src="script.js"></script>
+</body>
+
+</html>
