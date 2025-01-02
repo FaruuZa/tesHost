@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    text-decoration: none;
+    overflow: hidden;
+}
+
+body {
+    overflow: hidden;
+    background: linear-gradient(45deg, rgb(101, 67, 255), rgb(32, 144, 248), rgb(70, 117, 248));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#game-container {
+    position: relative;
+    width: 400px;
+    height: 600px;
+    border: 1px solid black;
+    overflow: hidden;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: linear-gradient(rgb(0, 17, 255), rgb(207, 207, 255), rgb(235, 235, 255));
+    border: none;
+    outline: solid white 10px;
+    height: 100%;
+}
+
+#game-over-popup {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid black;
+}
+
+#back {
+    color: white;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+#posisi {
+    position: absolute;
+    color: white;
+    top: 20px;
+    left: 20px;
+}

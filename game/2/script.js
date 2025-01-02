@@ -19,7 +19,7 @@ function startGame() {
     gameOverPopup.style.display = 'none';
     createBall();
     createBomb();
-    gameLoop = setInterval(dropObjects, 50);
+    gameLoop = setInterval(dropObjects, 25);
 }
 
 // Fungsi untuk menggerakkan pemain
