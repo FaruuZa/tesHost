@@ -5,13 +5,13 @@ document.getElementById('guardButton').addEventListener('click', () => playerAct
 document.getElementById('chargeButton').addEventListener('click', () => playerAction('charge'));
 document.getElementById('healButton').addEventListener('click', () => playerAction('heal'));
 
-const canvasWidth = ctx.canvas.width = window.innerWidth*0.8;  
+const canvasWidth = ctx.canvas.width = window.innerWidth * 0.8;
 // Stances dan frame counts
-const playerStances = { idle: [], attack: [], hit: [], dead: [] };
-const enemyStances = { idle: [], attack: [], hit: [], dead: [] };
+const playerStances = { idle: [], attack: [], hit: [], dead: [], chargeStart: [], chargeIdle: [], chargeAttack: [] };
+const enemyStances = { idle: [], attack: [], hit: [], dead: [], chargeStart: [], chargeIdle: [], chargeAttack: [] };
 
-const playerFrameCounts = { idle: 38, attack: 11, hit: 8, dead: 4 };
-const enemyFrameCounts = { idle: 44, attack: 11, hit: 7, dead: 4 };
+const playerFrameCounts = { idle: 38, attack: 11, hit: 8, dead: 4, chargeStart: 8, chargeIdle: 1, chargeAttack: 11 };
+const enemyFrameCounts = { idle: 44, attack: 11, hit: 7, dead: 4, chargeStart: 1, chargeIdle: 14, chargeAttack: 10 };
 
 let imagesLoaded = 0;
 const totalImages = playerFrameCounts.idle + playerFrameCounts.attack + playerFrameCounts.hit + playerFrameCounts.dead +
@@ -19,15 +19,15 @@ const totalImages = playerFrameCounts.idle + playerFrameCounts.attack + playerFr
 
 // Player dan enemies
 const player = {
-    x: canvasWidth*0.25, y: canvas.height/3, width: 100, height: 100, health: 100, attack: 20,
-    isTurn: true, currentFrame: 0, frameCount: 0, stance: 'idle', originalX: canvasWidth*0.25,
+    x: canvasWidth * 0.25, y: canvas.height / 3, width: 100, height: 100, health: 100, attack: 20,
+    isTurn: true, currentFrame: 0, frameCount: 0, stance: 'idle', originalX: canvasWidth * 0.25,
     isCharging: false, isGuarding: false, chargeCooldown: 0, guardCooldown: 0, healCooldown: 0
 };
 
 const enemies = [
     {
-        x: canvasWidth*0.75, y: canvas.height/3, width: 100, height: 100, health: 100, attack: 10,
-        isTurn: false, currentFrame: 0, frameCount: 0, stance: 'idle', originalX:canvasWidth*0.75,
+        x: canvasWidth * 0.75, y: canvas.height / 3, width: 100, height: 100, health: 100, attack: 10,
+        isTurn: false, currentFrame: 0, frameCount: 0, stance: 'idle', originalX: canvasWidth * 0.75,
         isCharging: false, isGuarding: false, chargeCooldown: 0, guardCooldown: 0, healCooldown: 0
     }
 ];
@@ -75,7 +75,7 @@ function changeEnemyStance(newStance) {
     enemies[currentEnemyIndex].currentFrame = 0; // Reset currentFrame ke 0
 }
 
-function getAnimationDuration(frameCount, fps = 60) {
+function getAnimationDuration(frameCount, fps = 30) { // Ubah FPS default menjadi 30
     return (frameCount / fps) * 1000; // Durasi dalam milidetik
 }
 // Fungsi untuk menggambar health bar
@@ -93,18 +93,6 @@ function drawPlayer() {
     drawHealthBar(player.x, player.y + player.height + 10, player.width, 10, player.health, player.isCharging, player.isGuarding);
 }
 
-// Fungsi untuk menggambar enemies
-// function drawEnemies() {
-//     enemies.forEach((enemy, index) => {
-//         if (index === currentEnemyIndex) {
-//             const img = enemyStances[enemy.stance][enemy.currentFrame];
-//             if (img) {
-//                 ctx.drawImage(img, enemy.x, enemy.y, enemy.width, enemy.height);
-//                 drawHealthBar(enemy.x, enemy.y + enemy.height + 10, enemy.width, 10, enemy.health, enemy.isCharging, enemy.isGuarding);
-//             }
-//         }
-//     });
-// }
 
 // Fungsi untuk menangani aksi player
 function playerAction(action) {
@@ -113,6 +101,7 @@ function playerAction(action) {
         if (player.isCharging) {
             switch (action) {
                 case 'attack':
+                    changePlayerStance('chargeAttack');
                     playerAttack();
                     break;
                 default:
@@ -128,35 +117,39 @@ function playerAction(action) {
                     if (player.guardCooldown === 0) {
                         player.isGuarding = true;
                         player.guardCooldown = 3; // Set cooldown
-                        nextTurn()
+                        nextTurn();
                     } else {
-                        err = true
+                        err = true;
                     }
                     break;
                 case 'charge':
                     if (player.chargeCooldown === 0) {
-                        player.isCharging = true;
-                        player.chargeCooldown = 3; // Set cooldown
-                        nextTurn()
+                        changePlayerStance('chargeStart');
+                        setTimeout(() => {
+                            changePlayerStance('chargeIdle');
+                            player.isCharging = true;
+                            player.chargeCooldown = 3; // Set cooldown
+                            nextTurn();
+                        }, getAnimationDuration(playerFrameCounts.chargeStart));
                     } else {
-                        err = true
+                        err = true;
                     }
                     break;
                 case 'heal':
                     if (player.healCooldown === 0) {
-                        const healAmount = getRandomDamage(10, 15);
+                        const healAmount = getRandomDamage(25, 45);
                         player.health = Math.min(player.health + healAmount, 100);
-                        player.healCooldown = 2; // Set cooldown
+                        player.healCooldown = 5; // Set cooldown
                         addDamageText(player.x + player.width / 2, player.y - 10, `+${healAmount}`); // Tampilkan teks heal
-                        nextTurn()
+                        nextTurn();
                     } else {
-                        err = true
+                        err = true;
                     }
                     break;
             }
         }
         if (!err) {
-            console.log(turn + ' - player - ' + action)
+            console.log(turn + ' - player - ' + action);
         }
     }
 }
@@ -199,28 +192,31 @@ function showEnemyAction(action) {
 function executeEnemyAction() {
     switch (enemyCurrentAction) {
         case 'attack':
-            // console.log(turn + " serang")
             enemyAttack(); // Jalankan serangan enemy
             break;
         case 'charge':
-            // console.log(turn + " charge")
             enemies[currentEnemyIndex].isCharging = true; // Aktifkan charge
-            nextTurn()
+            changeEnemyStance('chargeStart');
+            setTimeout(() => {
+                changeEnemyStance('chargeIdle');
+                nextTurn();
+            }, getAnimationDuration(enemyFrameCounts.chargeStart));
             break;
         case 'guard':
             enemies[currentEnemyIndex].isGuarding = true; // Aktifkan guard
-            nextTurn()
+            nextTurn();
             break;
     }
-    console.log(turn + ' - Enemy - ' + enemyCurrentAction)
-
-    // showEnemyAction(enemyAction())
-    // nextTurn()
+    console.log(turn + ' - Enemy - ' + enemyCurrentAction);
 }
 // Fungsi untuk menyerang musuh
 function playerAttack() {
-    player.x = enemies[currentEnemyIndex].x-player.width
-    changePlayerStance('attack');
+    player.x = enemies[currentEnemyIndex].x - player.width
+    if (player.isCharging) {
+        changePlayerStance('chargeAttack')
+    } else {
+        changePlayerStance('attack');
+    }
     setTimeout(() => {
         let damage = getRandomDamage(5, 20);
         if (player.isCharging) {
@@ -242,7 +238,11 @@ function playerAttack() {
         } else {
             changeEnemyStance('hit');
             setTimeout(() => {
-                changeEnemyStance('idle');
+                if (enemies[currentEnemyIndex].isCharging) {
+                    changeEnemyStance('chargeIdle');
+                } else {
+                    changeEnemyStance('idle');
+                }
                 player.x = player.originalX
                 changePlayerStance('idle')
                 setTimeout(() => {
@@ -264,8 +264,13 @@ function enemyTurn() {
 
 // Fungsi untuk menyerang player
 function enemyAttack() {
-    enemies[currentEnemyIndex].x = player.x+enemies[currentEnemyIndex].width
-    changeEnemyStance('attack');
+    enemies[currentEnemyIndex].x = player.x + enemies[currentEnemyIndex].width
+    if (enemies[currentEnemyIndex].isCharging) {
+        changeEnemyStance('chargeAttack');
+    } else {
+        changeEnemyStance('attack');
+    }
+
     setTimeout(() => {
         let damage = getRandomDamage(5, 20);
         if (enemies[currentEnemyIndex].isCharging) {
@@ -292,10 +297,16 @@ function enemyAttack() {
 }
 
 function playerHit() {
-    changePlayerStance('hit'); // Ubah stance ke hit
-    setTimeout(() => {
-        changePlayerStance('idle'); // Kembalikan ke idle setelah beberapa saat
-    }, getAnimationDuration(playerFrameCounts.hit)); // Durasi animasi hit
+    if (player.stance !== 'chargeIdle') { // Hanya ubah ke 'hit' jika tidak sedang di 'chargeIdle'
+        changePlayerStance('hit');
+        setTimeout(() => {
+            if (player.stance !== 'chargeIdle') { // Kembalikan ke 'idle' hanya jika tidak sedang di 'chargeIdle'
+                changePlayerStance('idle');
+            } else {
+                changePlayerStance('chargeIdle');
+            }
+        }, getAnimationDuration(playerFrameCounts.hit));
+    }
 }
 
 // Fungsi untuk beralih ke musuh berikutnya
@@ -354,14 +365,14 @@ function drawEnemies() {
         }
     });
 }
- 
+
 // ctx.canvas.height = window.innerHeight;
 // Fungsi untuk memperbarui frame animasi
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawPlayer();
     drawEnemies();
-    drawDamageTexts()
+    drawDamageTexts();
     player.currentFrame = (player.currentFrame + 1) % player.frameCount;
     if (enemies[currentEnemyIndex]) {
         enemies[currentEnemyIndex].currentFrame = (enemies[currentEnemyIndex].currentFrame + 1) % enemies[currentEnemyIndex].frameCount;
@@ -374,11 +385,19 @@ function startGame() {
     loadImages('attack', 'player', playerFrameCounts.attack);
     loadImages('hit', 'player', playerFrameCounts.hit);
     loadImages('dead', 'player', playerFrameCounts.dead);
+    loadImages('chargeStart', 'player', playerFrameCounts.chargeStart);
+    loadImages('chargeIdle', 'player', playerFrameCounts.chargeIdle);
+    loadImages('chargeAttack', 'player', playerFrameCounts.chargeAttack);
+
     loadImages('idle', 'enemies', enemyFrameCounts.idle);
     loadImages('attack', 'enemies', enemyFrameCounts.attack);
     loadImages('hit', 'enemies', enemyFrameCounts.hit);
     loadImages('dead', 'enemies', enemyFrameCounts.dead);
-    showEnemyAction(enemyAction())
+    loadImages('chargeStart', 'enemies', enemyFrameCounts.chargeStart);
+    loadImages('chargeIdle', 'enemies', enemyFrameCounts.chargeIdle);
+    loadImages('chargeAttack', 'enemies', enemyFrameCounts.chargeAttack);
+
+    showEnemyAction(enemyAction());
     nextTurn();
 }
 // next Turn
@@ -465,10 +484,13 @@ function drawDamageTexts() {
 
 // Memulai game
 startGame();
-function gameLoop() {
-    // if (!gameOver) {
+let fps = 30; // Ubah nilai FPS sesuai kebutuhan (misalnya 30 untuk lebih lambat)
+let lastTime = 0;
+
+function gameLoop(timestamp) {
+    if (timestamp - lastTime >= 1000 / fps) { // Batasi update berdasarkan FPS
+        lastTime = timestamp;
+        update();
+    }
     requestAnimationFrame(gameLoop);
-    update();
-    // }
-    // nextTurn()
 }
