@@ -389,8 +389,12 @@ function nextEnemy() {
     currentEnemyIndex++;
     if (currentEnemyIndex >= enemies.length) {
         console.log("All enemies defeated! You win!");
+        currentEnemyIndex--
         gameOver = true;
     } else {
+        player.health = Math.min(player.health + 20, 100);
+        addDamageText(player.x + player.width / 2, player.y - 10, `+20`); // Tampilkan teks heal
+        nextTurn();
         nextTurn()
         enemies[currentEnemyIndex].frameCount = enemyFrameCounts[enemies[currentEnemyIndex].stance];
     }
