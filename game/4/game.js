@@ -152,21 +152,22 @@ function showEnemyAction(action) {
 function executeEnemyAction() {
     switch (enemyCurrentAction) {
         case 'attack':
-            console.log("serang")
+            console.log(turn + " serang")
             enemyAttack(); // Jalankan serangan enemy
             break;
         case 'charge':
-            console.log("charge")
+            console.log(turn + " charge")
             enemies[currentEnemyIndex].isCharging = true; // Aktifkan charge
             player.isTurn = true; // Ganti giliran
             break;
         case 'guard':
-            console.log("guard")
+            console.log(turn + " guard")
             enemies[currentEnemyIndex].isGuarding = true; // Aktifkan guard
             player.isTurn = true; // Ganti giliran
             break;
     }
     showEnemyAction(enemyAction())
+    nextTurn()
 }
 function disablePlayerButtons() {
     console.log("disabled")

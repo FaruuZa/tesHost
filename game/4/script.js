@@ -5,6 +5,7 @@ document.getElementById('guardButton').addEventListener('click', () => playerAct
 document.getElementById('chargeButton').addEventListener('click', () => playerAction('charge'));
 document.getElementById('healButton').addEventListener('click', () => playerAction('heal'));
 
+const canvasWidth = ctx.canvas.width = window.innerWidth*0.8;  
 // Stances dan frame counts
 const playerStances = { idle: [], attack: [], hit: [], dead: [] };
 const enemyStances = { idle: [], attack: [], hit: [], dead: [] };
@@ -18,15 +19,15 @@ const totalImages = playerFrameCounts.idle + playerFrameCounts.attack + playerFr
 
 // Player dan enemies
 const player = {
-    x: 100, y: 100, width: 100, height: 100, health: 100, attack: 20,
-    isTurn: true, currentFrame: 0, frameCount: 0, stance: 'idle', originalX: 100,
+    x: canvasWidth*0.25, y: canvas.height/3, width: 100, height: 100, health: 100, attack: 20,
+    isTurn: true, currentFrame: 0, frameCount: 0, stance: 'idle', originalX: canvasWidth*0.25,
     isCharging: false, isGuarding: false, chargeCooldown: 0, guardCooldown: 0, healCooldown: 0
 };
 
 const enemies = [
     {
-        x: 400, y: 100, width: 100, height: 100, health: 100, attack: 10,
-        isTurn: false, currentFrame: 0, frameCount: 0, stance: 'idle', originalX: 400,
+        x: canvasWidth*0.75, y: canvas.height/3, width: 100, height: 100, health: 100, attack: 10,
+        isTurn: false, currentFrame: 0, frameCount: 0, stance: 'idle', originalX:canvasWidth*0.75,
         isCharging: false, isGuarding: false, chargeCooldown: 0, guardCooldown: 0, healCooldown: 0
     }
 ];
@@ -74,7 +75,7 @@ function changeEnemyStance(newStance) {
     enemies[currentEnemyIndex].currentFrame = 0; // Reset currentFrame ke 0
 }
 
-function getAnimationDuration(frameCount, fps = 30) {
+function getAnimationDuration(frameCount, fps = 60) {
     return (frameCount / fps) * 1000; // Durasi dalam milidetik
 }
 // Fungsi untuk menggambar health bar
@@ -93,67 +94,82 @@ function drawPlayer() {
 }
 
 // Fungsi untuk menggambar enemies
-function drawEnemies() {
-    enemies.forEach((enemy, index) => {
-        if (index === currentEnemyIndex) {
-            const img = enemyStances[enemy.stance][enemy.currentFrame];
-            if (img) {
-                ctx.drawImage(img, enemy.x, enemy.y, enemy.width, enemy.height);
-                drawHealthBar(enemy.x, enemy.y + enemy.height + 10, enemy.width, 10, enemy.health, enemy.isCharging, enemy.isGuarding);
-            }
-        }
-    });
-}
-
-// Fungsi untuk memperbarui frame animasi
-function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawPlayer();
-    drawEnemies();
-    player.currentFrame = (player.currentFrame + 1) % player.frameCount;
-    if (enemies[currentEnemyIndex]) {
-        enemies[currentEnemyIndex].currentFrame = (enemies[currentEnemyIndex].currentFrame + 1) % enemies[currentEnemyIndex].frameCount;
-    }
-}
+// function drawEnemies() {
+//     enemies.forEach((enemy, index) => {
+//         if (index === currentEnemyIndex) {
+//             const img = enemyStances[enemy.stance][enemy.currentFrame];
+//             if (img) {
+//                 ctx.drawImage(img, enemy.x, enemy.y, enemy.width, enemy.height);
+//                 drawHealthBar(enemy.x, enemy.y + enemy.height + 10, enemy.width, 10, enemy.health, enemy.isCharging, enemy.isGuarding);
+//             }
+//         }
+//     });
+// }
 
 // Fungsi untuk menangani aksi player
 function playerAction(action) {
     if (player.isTurn) {
-        switch (action) {
-            case 'attack':
-                playerAttack();
-                break;
-            case 'guard':
-                if (player.guardCooldown === 0) {
-                    player.isGuarding = true;
-                    player.guardCooldown = 2; // Set cooldown
-                    // player.isTurn = false;
-                }
-                break;
-            case 'charge':
-                if (player.chargeCooldown === 0) {
-                    player.isCharging = true;
-                    player.chargeCooldown = 2; // Set cooldown
-                    // player.isTurn = false;
-                }
-                break;
-            case 'heal':
-                if (player.healCooldown === 0) {
-                    const healAmount = getRandomDamage(10, 15);
-                    player.health = Math.min(player.health + healAmount, 100);
-                    player.healCooldown = 1; // Set cooldown
-                }
-                break;
+        let err = false;
+        if (player.isCharging) {
+            switch (action) {
+                case 'attack':
+                    playerAttack();
+                    break;
+                default:
+                    err = true;
+                    break;
+            }
+        } else {
+            switch (action) {
+                case 'attack':
+                    playerAttack();
+                    break;
+                case 'guard':
+                    if (player.guardCooldown === 0) {
+                        player.isGuarding = true;
+                        player.guardCooldown = 3; // Set cooldown
+                        nextTurn()
+                    } else {
+                        err = true
+                    }
+                    break;
+                case 'charge':
+                    if (player.chargeCooldown === 0) {
+                        player.isCharging = true;
+                        player.chargeCooldown = 3; // Set cooldown
+                        nextTurn()
+                    } else {
+                        err = true
+                    }
+                    break;
+                case 'heal':
+                    if (player.healCooldown === 0) {
+                        const healAmount = getRandomDamage(10, 15);
+                        player.health = Math.min(player.health + healAmount, 100);
+                        player.healCooldown = 2; // Set cooldown
+                        addDamageText(player.x + player.width / 2, player.y - 10, `+${healAmount}`); // Tampilkan teks heal
+                        nextTurn()
+                    } else {
+                        err = true
+                    }
+                    break;
+            }
         }
-        player.isTurn = false;
-        // turn++; // Ganti turn
-        executeEnemyAction();
+        if (!err) {
+            console.log(turn + ' - player - ' + action)
+        }
     }
 }
 let enemyCurrentAction = null; // Menyimpan aksi yang dipilih enemy
 function enemyAction() {
     if (enemies[currentEnemyIndex].isCharging) {
         return 'attack'; // Selalu attack jika sedang charge
+    } else if (enemies[currentEnemyIndex].chargeCooldown > 0) {
+        const actions = ['attack', 'guard'];
+        return actions[Math.floor(Math.random() * actions.length)]; // Pilih aksi secara acak
+    } else if (enemies[currentEnemyIndex].guardCooldown > 0) {
+        const actions = ['attack', 'charge'];
+        return actions[Math.floor(Math.random() * actions.length)]; // Pilih aksi secara acak
     } else {
         const actions = ['attack', 'charge', 'guard'];
         return actions[Math.floor(Math.random() * actions.length)]; // Pilih aksi secara acak
@@ -181,26 +197,29 @@ function showEnemyAction(action) {
     enablePlayerButtons(); // Aktifkan tombol aksi player
 }
 function executeEnemyAction() {
-    const action = enemyAction(); // Dapatkan aksi yang dipilih
-    switch (action) {
+    switch (enemyCurrentAction) {
         case 'attack':
-            enemyAttack();
+            // console.log(turn + " serang")
+            enemyAttack(); // Jalankan serangan enemy
             break;
         case 'charge':
-            enemies[currentEnemyIndex].isCharging = true;
-            enemies[currentEnemyIndex].chargeCooldown = 2; // Set cooldown
-            // player.isTurn = true; // Ganti giliran
+            // console.log(turn + " charge")
+            enemies[currentEnemyIndex].isCharging = true; // Aktifkan charge
+            nextTurn()
             break;
         case 'guard':
-            enemies[currentEnemyIndex].isGuarding = true;
-            enemies[currentEnemyIndex].guardCooldown = 2; // Set cooldown
+            enemies[currentEnemyIndex].isGuarding = true; // Aktifkan guard
+            nextTurn()
             break;
     }
-    turn++
-    player.isTurn = true; // Ganti giliran
+    console.log(turn + ' - Enemy - ' + enemyCurrentAction)
+
+    // showEnemyAction(enemyAction())
+    // nextTurn()
 }
 // Fungsi untuk menyerang musuh
 function playerAttack() {
+    player.x = enemies[currentEnemyIndex].x-player.width
     changePlayerStance('attack');
     setTimeout(() => {
         let damage = getRandomDamage(5, 20);
@@ -208,44 +227,44 @@ function playerAttack() {
             damage *= 2; // Damage dikalikan 2 jika sedang charge
             player.isCharging = false; // Nonaktifkan charge setelah attack
         }
+        if (enemies[currentEnemyIndex].isGuarding) {
+            damage *= 0.5; // Kurangi damage jika player sedang guard
+            enemies[currentEnemyIndex].isGuarding = false; // Nonaktifkan guard setelah menerima damage
+        }
         enemies[currentEnemyIndex].health -= damage;
+        addDamageText(enemies[currentEnemyIndex].x + enemies[currentEnemyIndex].width / 2, enemies[currentEnemyIndex].y - 10, `-${damage}`); // Tampilkan teks dmg
         if (enemies[currentEnemyIndex].health <= 0) {
             enemies[currentEnemyIndex].health = 0;
             changeEnemyStance('dead');
+            player.x = player.originalX
+            changePlayerStance('idle')
             nextEnemy(); // Beralih ke musuh berikutnya
         } else {
             changeEnemyStance('hit');
             setTimeout(() => {
                 changeEnemyStance('idle');
-                player.isTurn = false;
-                if (!gameOver) enemyTurn();
+                player.x = player.originalX
+                changePlayerStance('idle')
+                setTimeout(() => {
+                    if (!gameOver) nextTurn();
+                }, 200)
+                // nextTurn()
             }, getAnimationDuration(enemyFrameCounts.hit));
         }
     }, getAnimationDuration(playerFrameCounts.attack));
 }
 
-function drawTurnIndicator() {
-    ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    ctx.fillText(turn, 170, 30)
-    if (turn % 2 === 1) {
-        ctx.fillText("Player's Turn", 10, 30);
-    } else {
-        ctx.fillText("Enemy's Turn", 10, 30);
-    }
-}
 // Fungsi untuk giliran musuh
 function enemyTurn() {
     if (!gameOver) {
-        const action = enemyAction();
-        console.log(action)
-        if (action === 'attack') enemyAttack();
-        else player.isTurn = true; // Kembali ke giliran player jika tidak menyerang
+        executeEnemyAction();
+        showEnemyAction(enemyAction())
     }
 }
 
 // Fungsi untuk menyerang player
 function enemyAttack() {
+    enemies[currentEnemyIndex].x = player.x+enemies[currentEnemyIndex].width
     changeEnemyStance('attack');
     setTimeout(() => {
         let damage = getRandomDamage(5, 20);
@@ -258,6 +277,7 @@ function enemyAttack() {
             player.isGuarding = false; // Nonaktifkan guard setelah menerima damage
         }
         player.health -= damage;
+        addDamageText(player.x + player.width / 2, player.y - 10, `-${damage}`); // Tampilkan teks dmg
         if (player.health <= 0) {
             player.health = 0;
             changePlayerStance('dead'); // Ubah stance player menjadi dead
@@ -267,7 +287,7 @@ function enemyAttack() {
         }
         enemies[currentEnemyIndex].x = enemies[currentEnemyIndex].originalX; // Kembali ke posisi awal
         changeEnemyStance('idle'); // Kembali ke stance idle
-        player.isTurn = true; // Ganti giliran
+        nextTurn();
     }, getAnimationDuration(enemyFrameCounts.attack)); // Durasi animasi attack
 }
 
@@ -285,7 +305,7 @@ function nextEnemy() {
         console.log("All enemies defeated! You win!");
         gameOver = true;
     } else {
-        player.isTurn = true;
+        nextTurn()
         enemies[currentEnemyIndex].frameCount = enemyFrameCounts[enemies[currentEnemyIndex].stance];
     }
 }
@@ -334,13 +354,14 @@ function drawEnemies() {
         }
     });
 }
-
+ 
+// ctx.canvas.height = window.innerHeight;
 // Fungsi untuk memperbarui frame animasi
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawPlayer();
     drawEnemies();
-    drawTurnIndicator(); // Tampilkan indikator turn
+    drawDamageTexts()
     player.currentFrame = (player.currentFrame + 1) % player.frameCount;
     if (enemies[currentEnemyIndex]) {
         enemies[currentEnemyIndex].currentFrame = (enemies[currentEnemyIndex].currentFrame + 1) % enemies[currentEnemyIndex].frameCount;
@@ -357,11 +378,97 @@ function startGame() {
     loadImages('attack', 'enemies', enemyFrameCounts.attack);
     loadImages('hit', 'enemies', enemyFrameCounts.hit);
     loadImages('dead', 'enemies', enemyFrameCounts.dead);
+    showEnemyAction(enemyAction())
+    nextTurn();
+}
+// next Turn
+turn = 0
+function nextTurn() {
+    if (!gameOver) {
+        turn++
+        if (turn % 2 == 0) {
+            player.isTurn = false
+            // enemies[currentEnemyIndex].isTurn = true
+            // executeEnemyAction();
+            enemyTurn()
+        } else {
+            player.isTurn = true
+            enemies[currentEnemyIndex].isTurn = false
+            decreaseCD()
+        }
+    }
+}
+
+function decreaseCD() {
+    if (player.chargeCooldown > 0) {
+        player.chargeCooldown--
+    }
+    if (player.guardCooldown > 0) {
+        player.guardCooldown--
+    }
+    if (player.healCooldown > 0) {
+        player.healCooldown--
+    }
+    document.getElementById('chargeButton').textContent = "Charge " + (player.chargeCooldown > 0 ? player.chargeCooldown : "");
+    document.getElementById('healButton').textContent = "Heal " + (player.healCooldown > 0 ? player.healCooldown : "");
+    document.getElementById('guardButton').textContent = "Guard " + (player.guardCooldown > 0 ? player.guardCooldown : "");
+
+    enemies.forEach((enemy, index) => {
+        if (enemy.chargeCooldown > 0) {
+            enemy.chargeCooldown--
+        }
+        if (enemy.guardCooldown > 0) {
+            enemy.guardCooldown--
+        }
+        if (enemy.healCooldown > 0) {
+            enemy.healCooldown--
+        }
+    })
+
+}
+
+let damageTexts = []; // Array untuk menyimpan teks damage
+function addDamageText(x, y, damage) {
+    damageTexts.push({
+        x: x,
+        y: y,
+        damage: damage,
+        time: Date.now() // Waktu saat damage ditambahkan
+    });
+}
+
+function drawDamageTexts() {
+    const currentTime = Date.now(); // Waktu saat ini
+    ctx.font = "20px Arial"; // Ukuran dan jenis font
+    ctx.fillStyle = "white"; // Warna teks
+    ctx.strokeStyle = "black"; // Warna outline teks
+    ctx.lineWidth = 2; // Ketebalan outline
+    ctx.textAlign = "center"; // Posisi teks di tengah
+
+    for (let i = damageTexts.length - 1; i >= 0; i--) {
+        const damageText = damageTexts[i];
+        const elapsedTime = currentTime - damageText.time; // Waktu yang telah berlalu
+
+        // Hapus damage setelah 0.8 detik (800 milidetik)
+        if (elapsedTime > 800) {
+            damageTexts.splice(i, 1); // Hapus damage dari array
+        } else {
+            // Gambar teks damage
+            ctx.strokeText(`${damageText.damage}`, damageText.x, damageText.y);
+            ctx.fillText(`${damageText.damage}`, damageText.x, damageText.y);
+
+            // Geser teks ke atas sedikit setiap frame
+            damageText.y -= 1;
+        }
+    }
 }
 
 // Memulai game
 startGame();
 function gameLoop() {
+    // if (!gameOver) {
     requestAnimationFrame(gameLoop);
     update();
+    // }
+    // nextTurn()
 }
