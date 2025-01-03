@@ -27,8 +27,8 @@ const player = {
 const bomb = {
     x: player.x,
     y: player.y,
-    width: 100,
-    height: 100,
+    width: 200,
+    height: 200,
     status: 'idle',
     frameCount: 0,
     currentFrame: 0,
@@ -113,6 +113,13 @@ function changePlayerStance(newStance) {
     player.currentFrame = 0; // Reset currentFrame ke 0
 }
 
+// function activeBomb() {
+//     bomb.status = 'aktif';
+//     bomb.frameCount = bombFrameCounts.idle;
+//     bomb.currentFrame = 0;
+//     bomb.stance = 'idle';
+// }
+
 function throwBomb() {
     bomb.status = 'explosion';
     bomb.frameCount = bombFrameCounts.explosion;
@@ -145,10 +152,13 @@ function drawHealthBar(x, y, width, height, health) {
     ctx.fillRect(x, y, healthWidth, height);
 }
 
+// bomb.currentFrame=0
 function drawBomb() {
     if (bomb.status !== 'idle') {
+        ctx.globalAlpha = 0.3
         ctx.drawImage(bombStances[bomb.stance][bomb.currentFrame], bomb.x, bomb.y, bomb.width, bomb.height);
         bomb.currentFrame = (bomb.currentFrame + 1) % bomb.frameCount;
+        ctx.globalAlpha = 1
     }
 }
 // Fungsi untuk menggambar player
@@ -157,8 +167,10 @@ function drawBomb() {
 //     drawHealthBar(player.x, player.y + player.height + 10, player.width, 10, player.health, player.isCharging, player.isGuarding);
 // }
 function drawPlayer() {
+
     ctx.drawImage(playerStances[player.stance][player.currentFrame], player.x, player.y, player.width, player.height);
     if (player.stance === 'chargeIdle') {
+        bomb.currentFrame = 0
         bomb.x = player.x + player.width / 2;
         bomb.y = player.y + player.height / 2;
         drawBomb();
@@ -199,6 +211,11 @@ function playerAction(action) {
                         changePlayerStance('chargeStart');
                         setTimeout(() => {
                             changePlayerStance('chargeIdle');
+                            player.width += 25;
+                            player.height += 25;
+                            player.y -= 25
+                            player.x -= 25
+                            // activeBomb()
                             player.isCharging = true;
                             player.chargeCooldown = 3; // Set cooldown
                             nextTurn();
@@ -270,6 +287,10 @@ function executeEnemyAction() {
             enemies[currentEnemyIndex].isCharging = true; // Aktifkan charge
             changeEnemyStance('chargeStart');
             setTimeout(() => {
+                enemies[currentEnemyIndex].width += 25;
+                enemies[currentEnemyIndex].height += 25;
+                enemies[currentEnemyIndex].y -= 25
+                enemies[currentEnemyIndex].x -= 25
                 changeEnemyStance('chargeIdle');
                 nextTurn();
             }, getAnimationDuration(enemyFrameCounts.chargeStart));
@@ -285,17 +306,18 @@ function executeEnemyAction() {
 function playerAttack() {
     player.x = enemies[currentEnemyIndex].x - player.width
     if (player.isCharging) {
-        // changePlayerStance('chargeAttack')
-        throwBomb()
+        bomb.x = player.x
     } else {
         changePlayerStance('attack');
     }
     setTimeout(() => {
         let damage = getRandomDamage(5, 20);
-        let crit = damage==20?true:false
+        let crit = damage == 20 ? true : false
         if (player.isCharging) {
             damage *= 2; // Damage dikalikan 2 jika sedang charge
-            player.isCharging = false; // Nonaktifkan charge setelah attack
+            bomb.x = enemies[currentEnemyIndex].x - 50
+            bomb.y = enemies[currentEnemyIndex].y - 50
+            // player.isCharging = false; // Nonaktifkan charge setelah attack
         }
         if (enemies[currentEnemyIndex].isGuarding) {
             damage *= 0.5; // Kurangi damage jika player sedang guard
@@ -303,10 +325,20 @@ function playerAttack() {
         }
         enemies[currentEnemyIndex].health -= damage;
         addDamageText(enemies[currentEnemyIndex].x + enemies[currentEnemyIndex].width / 2, enemies[currentEnemyIndex].y - 10, `-${damage}`, crit); // Tampilkan teks dmg
+        if (player.isCharging) {
+            throwBomb();
+        }
         if (enemies[currentEnemyIndex].health <= 0) {
             enemies[currentEnemyIndex].health = 0;
             changeEnemyStance('dead');
             player.x = player.originalX
+            if (player.isCharging) {
+                player.isCharging = false;
+                player.width -= 25;
+                player.height -= 25;
+                player.y += 25
+                player.x += 25
+            }
             changePlayerStance('idle')
             nextEnemy(); // Beralih ke musuh berikutnya
         } else {
@@ -318,6 +350,14 @@ function playerAttack() {
                     changeEnemyStance('idle');
                 }
                 player.x = player.originalX
+                if (player.isCharging) {
+                    player.isCharging = false;
+                    player.x = player.originalX
+                    player.width -= 25;
+                    player.height -= 25;
+                    player.y += 25
+                    player.x += 25
+                }
                 changePlayerStance('idle')
                 setTimeout(() => {
                     if (!gameOver) nextTurn();
@@ -347,10 +387,10 @@ function enemyAttack() {
 
     setTimeout(() => {
         let damage = getRandomDamage(5, 20);
-        let crit = damage==0?true:false
+        let crit = damage == 0 ? true : false
         if (enemies[currentEnemyIndex].isCharging) {
             damage *= 2; // Damage dikalikan 2 jika sedang charge
-            enemies[currentEnemyIndex].isCharging = false; // Nonaktifkan charge setelah attack
+            // Nonaktifkan charge setelah attack
         }
         if (player.isGuarding) {
             damage *= 0.5; // Kurangi damage jika player sedang guard
@@ -366,6 +406,13 @@ function enemyAttack() {
             playerHit(); // Panggil fungsi playerHit jika player belum mati
         }
         enemies[currentEnemyIndex].x = enemies[currentEnemyIndex].originalX; // Kembali ke posisi awal
+        if (enemies[currentEnemyIndex].isCharging) {
+            enemies[currentEnemyIndex].isCharging = false;
+            enemies[currentEnemyIndex].width -= 25;
+            enemies[currentEnemyIndex].height -= 25;
+            enemies[currentEnemyIndex].y += 25
+            enemies[currentEnemyIndex].x += 25
+        }
         changeEnemyStance('idle'); // Kembali ke stance idle
         nextTurn();
     }, getAnimationDuration(enemyFrameCounts.attack)); // Durasi animasi attack
@@ -530,12 +577,12 @@ function decreaseCD() {
 }
 
 let damageTexts = []; // Array untuk menyimpan teks damage
-function addDamageText(x, y, damage, critical=false) {
+function addDamageText(x, y, damage, critical = false) {
     damageTexts.push({
         x: x,
         y: y,
         damage: damage,
-        critical:critical,
+        critical: critical,
         time: Date.now() // Waktu saat damage ditambahkan
     });
 }
