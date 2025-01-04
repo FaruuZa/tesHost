@@ -66,11 +66,16 @@ const enemies = [
 
 let currentEnemyIndex = 0;
 let gameOver = false;
-let turn = 1; // Turn ganjil: player, turn genap: enemy
+let turn = 1;
 
 // Efek suara
 const attackSound = new Audio('sounds/attack.mp3');
 const hitSound = new Audio('sounds/hit.mp3');
+const criticalSound = new Audio('sounds/critical.mp3');
+const chargeSound = new Audio('sounds/charge.mp3');
+const chompSound = new Audio('sounds/chomp.mp3');
+const winSound = new Audio('sounds/win.mp3');
+const loseSound = new Audio('sounds/lose.mp3');
 
 // Fungsi untuk memuat gambar
 function loadImages(stance, type, frameCount) {
@@ -136,11 +141,11 @@ function throwBomb() {
 
 function changeEnemyStance(newStance) {
     enemies[currentEnemyIndex].stance = newStance;
-    enemies[currentEnemyIndex].frameCount = enemyFrameCounts[newStance]; // Update frameCount sesuai stance baru
-    enemies[currentEnemyIndex].currentFrame = 0; // Reset currentFrame ke 0
+    enemies[currentEnemyIndex].frameCount = enemyFrameCounts[newStance];
+    enemies[currentEnemyIndex].currentFrame = 0;
 }
 
-function getAnimationDuration(frameCount, fps = 30) { // Ubah FPS default menjadi 30
+function getAnimationDuration(frameCount, fps = 30) {
     return (frameCount / fps) * 1000; // Durasi dalam milidetik
 }
 // Fungsi untuk menggambar health bar
@@ -201,7 +206,9 @@ function playerAction(action) {
                     if (player.guardCooldown === 0) {
                         player.isGuarding = true;
                         player.guardCooldown = 3; // Set cooldown
-                        nextTurn();
+                        setTimeout(() => {
+                            nextTurn();
+                        }, 200)
                     } else {
                         err = true;
                     }
@@ -218,7 +225,9 @@ function playerAction(action) {
                             // activeBomb()
                             player.isCharging = true;
                             player.chargeCooldown = 3; // Set cooldown
-                            nextTurn();
+                            setTimeout(() => {
+                                nextTurn();
+                            }, 200)
                         }, getAnimationDuration(playerFrameCounts.chargeStart));
                     } else {
                         err = true;
@@ -229,16 +238,22 @@ function playerAction(action) {
                         const healAmount = getRandomDamage(25, 45);
                         player.health = Math.min(player.health + healAmount, 100);
                         player.healCooldown = 5; // Set cooldown
-                        addDamageText(player.x + player.width / 2, player.y - 10, `+${healAmount}`); // Tampilkan teks heal
-                        nextTurn();
+                        addDamageText(player.x + player.width / 2, player.y - 10, `+${healAmount}`);
+                        setTimeout(() => {
+                            nextTurn();
+                        }, 200)
                     } else {
                         err = true;
                     }
+                    break;
+                default:
+                    err = true;
                     break;
             }
         }
         if (!err) {
             console.log(turn + ' - player - ' + action);
+            disablePlayerButtons()
         }
     }
 }
@@ -258,7 +273,7 @@ function enemyAction() {
     }
 }
 function disablePlayerButtons() {
-    // console.log("disabled")
+    console.log("disabled")
     document.getElementById('attackButton').disabled = true;
     document.getElementById('guardButton').disabled = true;
     document.getElementById('chargeButton').disabled = true;
@@ -292,13 +307,19 @@ function executeEnemyAction() {
                 enemies[currentEnemyIndex].y -= 25
                 enemies[currentEnemyIndex].x -= 25
                 changeEnemyStance('chargeIdle');
-                nextTurn();
+                setTimeout(() => {
+                    nextTurn();
+                }, 200)
             }, getAnimationDuration(enemyFrameCounts.chargeStart));
             break;
         case 'guard':
             enemies[currentEnemyIndex].isGuarding = true; // Aktifkan guard
-            nextTurn();
+            setTimeout(() => {
+                nextTurn();
+            }, 200)
             break;
+        default:
+            nextTurn()
     }
     console.log(turn + ' - Enemy - ' + enemyCurrentAction);
 }
@@ -307,8 +328,11 @@ function playerAttack() {
     player.x = enemies[currentEnemyIndex].x - player.width
     if (player.isCharging) {
         bomb.x = player.x
+        changePlayerStance('chargeAttack')
+        chargeSound.play()
     } else {
         changePlayerStance('attack');
+        attackSound.play()
     }
     setTimeout(() => {
         let damage = getRandomDamage(5, 20);
@@ -384,7 +408,9 @@ function enemyAttack() {
     } else {
         changeEnemyStance('attack');
     }
-
+    setTimeout(() => {
+        chompSound.play()
+    }, 100)
     setTimeout(() => {
         let damage = getRandomDamage(5, 20);
         let crit = damage == 0 ? true : false
@@ -402,6 +428,8 @@ function enemyAttack() {
             player.health = 0;
             changePlayerStance('dead'); // Ubah stance player menjadi dead
             gameOver = true; // Hentikan game
+            ShowGameOver()
+            loseSound.play()
         } else {
             playerHit(); // Panggil fungsi playerHit jika player belum mati
         }
@@ -419,32 +447,42 @@ function enemyAttack() {
 }
 
 function playerHit() {
-    if (player.stance !== 'chargeIdle') { // Hanya ubah ke 'hit' jika tidak sedang di 'chargeIdle'
-        changePlayerStance('hit');
-        setTimeout(() => {
-            if (player.stance !== 'chargeIdle') { // Kembalikan ke 'idle' hanya jika tidak sedang di 'chargeIdle'
-                changePlayerStance('idle');
-            } else {
-                changePlayerStance('chargeIdle');
-            }
-        }, getAnimationDuration(playerFrameCounts.hit));
-    }
+    // if (player.stance !== 'chargeIdle') { // Hanya ubah ke 'hit' jika tidak sedang di 'chargeIdle'
+    changePlayerStance('hit');
+    hitSound.play()
+    setTimeout(() => {
+        if (!player.isCharging) { // Kembalikan ke 'idle' hanya jika tidak sedang di 'chargeIdle'
+            changePlayerStance('idle');
+        } else {
+            changePlayerStance('chargeIdle');
+        }
+    }, getAnimationDuration(playerFrameCounts.hit));
+    // }
 }
 
 // Fungsi untuk beralih ke musuh berikutnya
 function nextEnemy() {
-    currentEnemyIndex++;
-    if (currentEnemyIndex >= enemies.length) {
-        console.log("All enemies defeated! You win!");
-        currentEnemyIndex--
-        gameOver = true;
-    } else {
-        player.health = Math.min(player.health + 20, 100);
-        addDamageText(player.x + player.width / 2, player.y - 10, `+20`); // Tampilkan teks heal
-        nextTurn();
-        nextTurn()
-        enemies[currentEnemyIndex].frameCount = enemyFrameCounts[enemies[currentEnemyIndex].stance];
-    }
+
+    setTimeout(() => {
+        currentEnemyIndex++;
+        if (currentEnemyIndex >= enemies.length) {
+            console.log("All enemies defeated! You win!");
+            currentEnemyIndex--
+            gameOver = true;
+            ShowGameOver(true)
+            winSound.play()
+        } else {
+            player.health = Math.min(player.health + 20, 100);
+            addDamageText(player.x + player.width / 2, player.y - 10, `+20`); // Tampilkan teks heal
+            enemyCurrentAction = null
+            // turn++
+            setTimeout(() => {
+                nextTurn();
+            }, 200)
+            enemies[currentEnemyIndex].frameCount = enemyFrameCounts[enemies[currentEnemyIndex].stance];
+        }
+    }, 500)
+
 }
 
 // Fungsi untuk mendapatkan damage secara acak
@@ -533,13 +571,13 @@ function startGame() {
 // next Turn
 turn = 0
 function nextTurn() {
+    console.log(turn)
     if (!gameOver) {
         turn++
         if (turn % 2 == 0) {
             player.isTurn = false
-            // enemies[currentEnemyIndex].isTurn = true
-            // executeEnemyAction();
             enemyTurn()
+            enablePlayerButtons()
         } else {
             player.isTurn = true
             enemies[currentEnemyIndex].isTurn = false
@@ -650,4 +688,81 @@ function gameLoop(timestamp) {
         update();
     }
     requestAnimationFrame(gameLoop);
+}
+
+function resetGame() {
+    // Reset player properties
+    player.health = 100;
+    player.isTurn = true;
+    player.currentFrame = 0;
+    player.stance = 'idle';
+    player.isCharging = false;
+    player.isGuarding = false;
+    player.chargeCooldown = 0;
+    player.guardCooldown = 0;
+    player.healCooldown = 0;
+    player.x = canvasWidth * 0.25;
+    player.y = canvas.height / 3;
+    player.width = 100;
+    player.height = 100;
+
+    // Reset bomb properties
+    bomb.status = 'idle';
+    bomb.currentFrame = 0;
+    bomb.stance = 'idle';
+    bomb.x = player.x;
+    bomb.y = player.y;
+
+    // Reset enemies properties
+    enemies.forEach(enemy => {
+        enemy.health = 100;
+        enemy.isTurn = false;
+        enemy.currentFrame = 0;
+        enemy.stance = 'idle';
+        enemy.isCharging = false;
+        enemy.isGuarding = false;
+        enemy.chargeCooldown = 0;
+        enemy.guardCooldown = 0;
+        enemy.healCooldown = 0;
+        enemy.x = canvasWidth * 0.75;
+        enemy.y = canvas.height / 3;
+        enemy.width = 100;
+        enemy.height = 100;
+    });
+
+    // Reset game state
+    currentEnemyIndex = 0;
+    gameOver = false;
+    turn = 1;
+
+    // Reset damage texts
+    damageTexts = [];
+
+    // Enable player buttons
+    enablePlayerButtons();
+
+    // Reset button text
+    document.getElementById('chargeButton').textContent = "Charge";
+    document.getElementById('healButton').textContent = "Heal";
+    document.getElementById('guardButton').textContent = "Guard";
+
+    // Restart game loop
+    turn = 0
+    startGame();
+}
+
+
+
+function ShowGameOver(isWin) {
+    if (isWin) {
+        document.querySelector('#gameOverText').innerHTML = 'You WIN!'
+    } else {
+        document.querySelector('#gameOverText').innerHTML = 'You LOSE!'
+    }
+    document.querySelector('.gameOver').style.display = 'flex'
+    document.getElementById('resetButton').addEventListener('click', () => {
+        document.querySelector('.gameOver').style.display = 'none'
+        resetGame()
+        // console.log('aa')
+    })
 }

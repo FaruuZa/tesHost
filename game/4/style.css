@@ -5,7 +5,7 @@
 
 #controls {
     position: absolute;
-    bottom: 20px;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -35,6 +35,34 @@ body {
 
 body{
     display: flex;
+    align-items: start;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.gameOver{
+    background-color: rgba(128, 128, 128, 0.212);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center
+    justify-content: center;
+    /* gap: 50px; */
+    /* padding: 10%; */
+}
+.gameOver h1{
+    font-family: monospace;
+    /* font-size: 40px; */
+    font-size-adjust: 1.2;
+    margin-bottom: 100px;
+}
+
+#resetButton{
+    padding: 20px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
 }
